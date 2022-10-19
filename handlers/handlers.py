@@ -2,6 +2,10 @@ from aiogram import types, Dispatcher
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from keyboard.markup import *
 from aiogram.dispatcher import FSMContext
+from db.models import BookHub
+from sqlalchemy import select
+import re
+from geopy import distance as dis
 
 
 class FSMLocation(StatesGroup):
@@ -29,9 +33,9 @@ async def get_lat_lon(message: types.Message, state: FSMContext):
     lat = message.location.latitude
     lon = message.location.longitude
 
-    await state.update_data(location=[lat, lon])
+    await state.update_data(location=(lat, lon))
     await FSMLocation.distance.set()
-    await message.answer("У якім радыусе шукаць?", reply_markup=inline_distance_markup())
+    await message.answer("У якім радыусе шукаць?", reply_markup=distance_markup())
 
 
 async def get_location_manualy(message: types.Message, state: FSMContext):
@@ -56,36 +60,46 @@ async def get_city(message: types.Message, state: FSMContext):
         data['city'] = city
 
     await FSMLocation.next()
-    await message.answer("У якім радыусе шукаць?", reply_markup=inline_distance_markup())
+    await message.answer("У якім радыусе шукаць?", reply_markup=distance_markup())
 
 
-async def get_distance(callback: types.CallbackQuery, state: FSMContext):
-    db_session = callback.bot.get("db")
-
-    async with state.proxy() as data:
-        data['distance'] = int(callback.data)
+async def get_distance(message: types.Message, state: FSMContext):
+    db_session = message.bot.get("db")
+    distance = float(re.sub("[^0-9]", "", message.text))
 
     async with state.proxy() as data:
+        data['distance'] = distance
         dict_data = data.as_dict()
         print(dict_data)
-        if "location" in dict_data.keys():
-            pass
-            
-        elif "city" and "country" in dict_data.keys():
-            pass
-        else:
-            print("state is not valid")
 
-    await callback.message.answer()
+    async with db_session() as session:
+
+        book_hubs_request = await session.execute(select(BookHub.name, 
+            BookHub.contacts, BookHub.country, BookHub.city).where(
+                BookHub.calculate_distance(dict_data["location"])<dict_data["distance"]))
+
+
+
+        book_hubs = book_hubs_request.all()
+        reply_list = [f"{index+1}. {hub.name}:\n{hub.contacts}\n{hub.country}, {hub.city}\n" for index, hub in enumerate(book_hubs)]
+        reply_string = "\n".join(reply_list)
+
     await state.finish()
+    await message.answer(reply_string, reply_markup = find_hub_markup())
+
 
 
 def register_handlers(dp: Dispatcher):
-    dp.register_message_handler(welcome, commands=['start', 'help'])
-    dp.register_message_handler(get_hubs, commands=['знайсці_шафу', 'вярнуцца'])
-    dp.register_message_handler(locate_me, commands=['падзяліцца_месцазнаходжаннем'])
-    dp.register_message_handler(get_lat_lon, content_types=['location'], state=FSMLocation.lat_lon)
-    dp.register_message_handler(get_location_manualy, commands=['задаць_уручную'], state=FSMLocation.lat_lon)
-    dp.register_message_handler(get_contry, state=FSMLocation.country)
-    dp.register_message_handler(get_city, state=FSMLocation.city)
-    dp.register_callback_query_handler(get_distance, state=FSMLocation.distance)
+    dp.register_message_handler(welcome, commands = ['start', 'help'])
+    dp.register_message_handler(
+        get_hubs, commands = ['знайсці_шафу', 'вярнуцца'])
+    dp.register_message_handler(
+        locate_me, commands = ['падзяліцца_месцазнаходжаннем'])
+    dp.register_message_handler(get_lat_lon, content_types = [
+                                'location'], state = FSMLocation.lat_lon)
+    dp.register_message_handler(get_location_manualy, commands = [
+                                'задаць_уручную'], state = FSMLocation.lat_lon)
+    dp.register_message_handler(get_contry, state = FSMLocation.country)
+    dp.register_message_handler(get_city, state = FSMLocation.city)
+    dp.register_message_handler(
+        get_distance, state = FSMLocation.distance)
