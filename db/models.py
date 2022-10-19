@@ -1,5 +1,7 @@
-from db.database import Base
+from db.base import Base
 from sqlalchemy import TIMESTAMP, Column, Numeric, BigInteger, Integer, String, Boolean, text
+from sqlalchemy.ext.declarative import declarative_base
+
 
 
 class BookHub(Base):
