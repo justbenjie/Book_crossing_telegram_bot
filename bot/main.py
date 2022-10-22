@@ -1,13 +1,13 @@
 import asyncio
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
-from config import settings
+from bot.config import settings
 from db.base import Base
 from aiogram import Bot
 from aiogram.dispatcher import Dispatcher, FSMContext
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from handlers.handlers import register_handlers
-from updates_worker import get_handled_updates_list
+from .updates_worker import get_handled_updates_list
 
 
 async def main():
