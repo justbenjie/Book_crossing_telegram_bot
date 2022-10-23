@@ -58,7 +58,7 @@ async def enter_location_manualy(message: types.Message, state: FSMContext):
 
 
 async def enter_country(message: types.Message, state: FSMContext):
-    country = message.text.strip().lower()
+    country = message.text.strip().lower().title()
 
     async with state.proxy() as data:
         data['country'] = country
@@ -68,7 +68,7 @@ async def enter_country(message: types.Message, state: FSMContext):
 
 
 async def enter_city(message: types.Message, state: FSMContext):
-    city = message.text.strip().lower()
+    city = message.text.strip().lower().title()
     reply_markup_text = ["Шукаць"]
 
     async with state.proxy() as data:
