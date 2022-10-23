@@ -101,6 +101,7 @@ async def find_hubs(message: types.Message, state: FSMContext):
 
     query = find_hubs_query(dict_data)
     async with db_session() as session:
+        print("connected")
         book_hubs = await session.execute(query)
 
     book_hubs_info = [
