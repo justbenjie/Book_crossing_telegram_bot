@@ -42,7 +42,9 @@ def find_hubs_query(data: dict):
     return query
 
 
-async def welcome(message: types.Message):
+async def welcome(message: types.Message, state: FSMContext):
+    
+    await state.finish()
     await message.answer("Вітаю!", reply_markup=create_markup(main_menu_markup_text))
 
 
@@ -145,7 +147,7 @@ async def name_add(message: types.Message, state: FSMContext):
         data['name'] = message.text
 
     await AddHubForm.next()
-    await message.answer("Увядзіце кантактную інфармацыю", reply_markup=types.ReplyKeyboardRemove())
+    await message.answer("Увядзіце кантактную інфармацыю", reply_markup=create_markup(cancel_markup_text))
 
 
 async def contacts_add(message: types.Message, state: FSMContext):
@@ -154,7 +156,7 @@ async def contacts_add(message: types.Message, state: FSMContext):
         data['contacts'] = message.text
 
     await AddHubForm.next()
-    await message.answer("Увядзіце краіну")
+    await message.answer("Увядзіце краіну", reply_markup=create_markup(cancel_markup_text))
 
 
 async def country_add(message: types.Message, state: FSMContext):
@@ -164,7 +166,7 @@ async def country_add(message: types.Message, state: FSMContext):
         data['country'] = country
     await AddHubForm.next()
 
-    await message.answer("Увядзіце горад")
+    await message.answer("Увядзіце горад", reply_markup=create_markup(cancel_markup_text))
 
 
 async def city_add(message: types.Message, state: FSMContext):
@@ -202,7 +204,6 @@ async def add_hub(message: types.Message, state: FSMContext):
         dict_data["latitude"] = dict_data["location"][0]
         dict_data["longitude"] = dict_data["location"][1]
         dict_data.pop('location', None)
-
     new_book_hub = BookHub(**dict_data)
 
     async with db_session() as session:
@@ -217,7 +218,7 @@ async def add_hub(message: types.Message, state: FSMContext):
 
 
 def register_handlers(dp: Dispatcher):
-    dp.register_message_handler(welcome, commands=['start', 'help'])
+    dp.register_message_handler(welcome, commands=['start', 'help'], state='*')
     dp.register_message_handler(
         start, Text(equals=["Знайсці шафу", "Дадаць шафу"]))
     

@@ -32,7 +32,7 @@ async def main():
     register_handlers(dp)
 
     try:
-        await dp.start_polling(allowed_updates=get_handled_updates_list(dp))
+        await dp.start_webhook(allowed_updates=get_handled_updates_list(dp))
     finally:
         await dp.storage.close()
         await dp.storage.wait_closed()
