@@ -1,12 +1,11 @@
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
-# button_search_bookcase = KeyboardButton('знайсці_шафу')
 
-# keyboard = ReplyKeyboardMarkup(resize_keyboard=True)
-
-# keyboard.add(button_search_bookcase)
-
-back_message = "/вярнуцца"
+main_menu_markup_text = ["Знайсці шафу", "Дадаць шафу"]
+find_markup_text = ["Шукаць", "Адмяніць"]
+add_markup_text = ["Дадаць", "Адмяніць"]
+skip_markup_text = ["Прапусціць"]
+distance_markup_text = ["1 км.", "5 км.", "10 км."]
 
 def create_markup(texts):
     markup = ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
@@ -23,4 +22,3 @@ def geolocation_markup():
     markup.add("Задаць уручную")
 
     return markup
-
