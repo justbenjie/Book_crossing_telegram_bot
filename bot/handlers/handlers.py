@@ -82,6 +82,17 @@ async def distance_find(message: types.Message, state: FSMContext):
     await message.answer(reply, reply_markup=create_markup(main_menu_markup_text))
 
 
+async def name_add(message: types.Message, state: FSMContext):
+
+    async with state.proxy() as data:
+        data["name"] = message.text
+
+    await AddHubForm.next()
+    await message.answer(
+        "Увядзіце кантактную інфармацыю", reply_markup=create_markup(cancel_markup_text)
+    )
+
+
 async def contacts_add(message: types.Message, state: FSMContext):
 
     async with state.proxy() as data:
@@ -130,8 +141,9 @@ def register_handlers(dp: Dispatcher):
     dp.register_message_handler(
         location_find, content_types=["location"], state=FindHubForm.location
     )
-
     dp.register_message_handler(distance_find, state=FindHubForm.distance)
+
+    dp.register_message_handler(name_add, state=AddHubForm.name)
     dp.register_message_handler(contacts_add, state=AddHubForm.contacts)
     dp.register_message_handler(
         location_add, content_types=["location"], state=AddHubForm.location
