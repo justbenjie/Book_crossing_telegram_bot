@@ -18,9 +18,6 @@ async def welcome(message: types.Message, state: FSMContext):
     await message.answer("Вітаю!", reply_markup=create_markup(main_menu_markup_text))
 
 
-async def main_menu(message: types.Message):
-    print(message.)
-
 async def start(message: types.Message):
     if message.text == "Знайсці шафу":
         await FindHubForm.location.set()
@@ -104,12 +101,13 @@ async def contacts_add(message: types.Message, state: FSMContext):
 
     await AddHubForm.next()
     await message.answer(
-        "Дадайце інфармацыю аб месцазнаходжанні (📎->месцазнаходжанне)", reply_markup=create_markup(cancel_markup_text)
+        "Дадайце інфармацыю аб месцазнаходжанні (📎->месцазнаходжанне)",
+        reply_markup=create_markup(cancel_markup_text),
     )
 
 
 async def location_add(message: types.Message, state: FSMContext):
-    
+
     lat = message.location.latitude
     lon = message.location.longitude
 
