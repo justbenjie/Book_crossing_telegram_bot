@@ -2,7 +2,8 @@ import enum
 from gettext import find
 from aiogram import types, Dispatcher
 from aiogram.dispatcher.filters import Text
-from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.utils.emoji import emojize
+from aiogram.utils.markdown import bold, code, italic, text
 from markup import *
 from aiogram.dispatcher import FSMContext
 from db.models import BookHub
@@ -16,6 +17,9 @@ async def welcome(message: types.Message, state: FSMContext):
     await state.finish()
     await message.answer("Вітаю!", reply_markup=create_markup(main_menu_markup_text))
 
+
+async def main_menu(message: types.Message):
+    print(message.)
 
 async def start(message: types.Message):
     if message.text == "Знайсці шафу":
@@ -100,11 +104,12 @@ async def contacts_add(message: types.Message, state: FSMContext):
 
     await AddHubForm.next()
     await message.answer(
-        "Увядзіце краіну", reply_markup=create_markup(cancel_markup_text)
+        "Дадайце інфармацыю аб месцазнаходжанні (📎->месцазнаходжанне)", reply_markup=create_markup(cancel_markup_text)
     )
 
 
 async def location_add(message: types.Message, state: FSMContext):
+    
     lat = message.location.latitude
     lon = message.location.longitude
 
@@ -134,12 +139,13 @@ async def location_add(message: types.Message, state: FSMContext):
 
 
 def register_handlers(dp: Dispatcher):
+
     dp.register_message_handler(welcome, commands=["start", "help"], state="*")
     dp.register_message_handler(start, Text(equals=["Знайсці шафу", "Дадаць шафу"]))
 
     dp.register_message_handler(cancel, Text(equals="Адмяніць"), state="*")
     dp.register_message_handler(
-        location_find, content_types=["location"], state=FindHubForm.location
+        location_find, content_types=["location", "venue"], state=FindHubForm.location
     )
     dp.register_message_handler(distance_find, state=FindHubForm.distance)
 
