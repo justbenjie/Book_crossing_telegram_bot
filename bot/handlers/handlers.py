@@ -64,19 +64,21 @@ async def distance_find(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         dict_data = data.as_dict()
 
-    query = select(BookHub.name, BookHub.contacts, BookHub.country, BookHub.city).where(
+    query = select(BookHub.name, BookHub.contacts).where(
         BookHub.calculate_distance(dict_data["location"]) < dict_data["distance"]
     )
 
     async with db_session() as session:
         book_hubs = await session.execute(query)
 
-    book_hubs_info = [
-        f"{index+1}. {hub.name}:\n{hub.contacts}\n{hub.country}, {hub.city}\n"
-        for index, hub in enumerate(book_hubs)
-    ]
-    reply = "Знойдзена па вашым запыце:\n\n" + "\n".join(book_hubs_info)
-
+    if len(book_hubs) != 0:
+        book_hubs_info = [
+            f"{index+1}. {hub.name}:\n{hub.contacts}\n{hub.country}, {hub.city}\n"
+            for index, hub in enumerate(book_hubs)
+        ]
+        reply = "Знойдзена па вашым запыце:\n\n" + "\n".join(book_hubs_info)
+    else:
+        reply = "Нажаль паблізу няма бібліятэк ці палічак з беларускімі кнігамі. \nАле магчыма побач з табой знойдуцца прыватныя кніжкі іншых карыстальнікаў. \nПашукай тут: staronki.space"
     await state.finish()
     await message.answer(reply, reply_markup=create_markup(main_menu_markup_text))
 
@@ -99,7 +101,7 @@ async def contacts_add(message: types.Message, state: FSMContext):
 
     await AddHubForm.next()
     await message.answer(
-        "Дадайце інфармацыю аб месцазнаходжанні (📎->месцазнаходжанне)",
+        "Дадайце інфармацыю аб месцазнаходжанні\n(📎->месцазнаходжанне)",
         reply_markup=create_markup(cancel_markup_text),
     )
 
@@ -136,7 +138,6 @@ async def location_add(message: types.Message, state: FSMContext):
 
 def register_handlers(dp: Dispatcher):
 
-    dp.register_message_handler(welcome, commands=["start", "help"], state="*")
     dp.register_message_handler(start, Text(equals=["Знайсці шафу", "Дадаць шафу"]))
 
     dp.register_message_handler(cancel, Text(equals="Адмяніць"), state="*")
@@ -148,5 +149,6 @@ def register_handlers(dp: Dispatcher):
     dp.register_message_handler(name_add, state=AddHubForm.name)
     dp.register_message_handler(contacts_add, state=AddHubForm.contacts)
     dp.register_message_handler(
-        location_add, content_types=["location"], state=AddHubForm.location
+        location_add, content_types=["location", "venue"], state=AddHubForm.location
     )
+    dp.register_message_handler(welcome, state="*")
