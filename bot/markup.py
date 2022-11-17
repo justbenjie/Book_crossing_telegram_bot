@@ -8,6 +8,7 @@ cancel_markup_text = ["Адмяніць"]
 skip_markup_text = ["Прапусціць", "Адмяніць"]
 distance_markup_text = ["1 км.", "5 км.", "10 км."]
 
+
 def create_markup(texts):
     markup = ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
     for text in texts:
@@ -18,8 +19,6 @@ def create_markup(texts):
 
 def geolocation_markup():
     markup = ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
-    markup.add(KeyboardButton(
-        "Падзяліцца месцазнаходжаннем", request_location=True))
-    markup.add("Задаць уручную")
+    markup.add(KeyboardButton("Падзяліцца месцазнаходжаннем", request_location=True))
 
     return markup

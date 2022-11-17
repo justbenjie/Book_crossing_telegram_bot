@@ -4,7 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from config import settings
 from db.base import Base
 from aiogram import Bot
-from aiogram.dispatcher import Dispatcher, FSMContext
+from aiogram.dispatcher import Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from handlers.handlers import register_handlers
 from updates_worker import get_handled_updates_list
@@ -19,7 +19,8 @@ async def main():
         await conn.run_sync(Base.metadata.create_all)
 
     async_session_maker = sessionmaker(
-        engine, expire_on_commit=False, class_=AsyncSession)
+        engine, expire_on_commit=False, class_=AsyncSession
+    )
 
     bot = Bot(token=settings.token_bot)
 
@@ -39,9 +40,8 @@ async def main():
         await bot.session.close()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     try:
         asyncio.run(main())
-    except(KeyboardInterrupt, SystemExit):
+    except (KeyboardInterrupt, SystemExit):
         print("Bot stopped!")
-
