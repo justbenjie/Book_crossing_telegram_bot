@@ -2,8 +2,6 @@ import enum
 from gettext import find
 from aiogram import types, Dispatcher
 from aiogram.dispatcher.filters import Text
-from aiogram.utils.emoji import emojize
-from aiogram.utils.markdown import bold, code, italic, text
 from markup import *
 from aiogram.dispatcher import FSMContext
 from db.models import BookHub
