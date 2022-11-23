@@ -1,11 +1,11 @@
 from aiogram.types import ReplyKeyboardMarkup, KeyboardButton
 
 
-main_menu_markup_text = ["Знайсці шафу", "Дадаць шафу"]
+main_menu_markup_text = ["Знайсці палічку", "Дадаць палічку"]
 find_markup_text = ["Шукаць", "Адмяніць"]
 add_markup_text = ["Дадаць", "Адмяніць"]
 cancel_markup_text = ["Адмяніць"]
-distance_markup_text = ["1 км.", "5 км.", "10 км."]
+distance_markup_text = ["2 км.", "5 км.", "10 км."]
 
 
 def create_markup(texts):

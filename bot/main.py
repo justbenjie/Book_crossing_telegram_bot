@@ -1,4 +1,6 @@
 import asyncio
+from geopy.geocoders import Nominatim
+from geopy.adapters import AioHTTPAdapter
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from config import settings
@@ -25,6 +27,11 @@ async def main():
     bot = Bot(token=settings.token_bot)
 
     bot["db"] = async_session_maker
+
+    async_geolocator = Nominatim(
+        user_agent="staronki_bot", adapter_factory=AioHTTPAdapter, timeout=15
+    )
+    bot["geocoder"] = async_geolocator
 
     storage = MemoryStorage()
 

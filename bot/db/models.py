@@ -11,10 +11,10 @@ class BookHub(Base):
     __tablename__ = "book_hub"
 
     id = Column(BigInteger, primary_key=True, nullable=False)
-    name = Column(VARCHAR(256), nullable=False)
+    name = Column(VARCHAR(), nullable=False)
     contacts = Column(VARCHAR(256), nullable=True)
-    # country = Column(VARCHAR(256), nullable=True)
-    # city = Column(VARCHAR(256), nullable=True)
+    country = Column(VARCHAR(256), nullable=True)
+    city = Column(VARCHAR(256), nullable=True)
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     registrated_at = Column(
