@@ -10,6 +10,8 @@ from sqlalchemy import select
 import re
 from .fsm import FindHubForm, AddHubForm
 from geopy.exc import GeocoderTimedOut
+from geopy.geocoders import Nominatim
+from geopy.adapters import AioHTTPAdapter
 
 
 async def welcome(message: types.Message, state: FSMContext):
@@ -135,7 +137,9 @@ async def location_add(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         dict_data = data.as_dict()
 
-    async with geocoder_session as geolocator:
+    async with Nominatim(
+        user_agent="staronki_bot", adapter_factory=AioHTTPAdapter, timeout=15
+    ) as geolocator:
         for i in range(10):
             try:
                 location = await geolocator.reverse(

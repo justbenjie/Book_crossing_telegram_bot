@@ -28,10 +28,10 @@ async def main():
 
     bot["db"] = async_session_maker
 
-    async_geolocator = Nominatim(
-        user_agent="staronki_bot", adapter_factory=AioHTTPAdapter, timeout=15
-    )
-    bot["geocoder"] = async_geolocator
+    # async_geolocator = Nominatim(
+    #     user_agent="staronki_bot", adapter_factory=AioHTTPAdapter, timeout=15
+    # )
+    # bot["geocoder"] = async_geolocator
 
     storage = MemoryStorage()
 
