@@ -23,7 +23,7 @@ async def main():
         engine, expire_on_commit=False, class_=AsyncSession
     )
 
-    bot = Bot(token=settings.token_bot, parse_mode="Markdown")
+    bot = Bot(token=settings.token_bot)
 
     bot["db"] = async_session_maker
 

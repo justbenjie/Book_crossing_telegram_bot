@@ -18,8 +18,7 @@ async def welcome(message: types.Message, state: FSMContext):
     reply = "Прывітанне👋\n\nЯ дапамагу вам з пошукам і даданнем палічак з беларускімі кнігамі.\n\nВы таксама можаце знайсці кніжкі на [нашым сайце.](https://bbc-max.herokuapp.com/)"
     await state.finish()
     await message.answer(
-        reply,
-        reply_markup=create_markup(main_menu_markup_text),
+        reply, reply_markup=create_markup(main_menu_markup_text), parse_mode="Markdown"
     )
 
 
@@ -86,7 +85,7 @@ async def distance_find(message: types.Message, state: FSMContext):
         hubs = await session.execute(query)
 
     hubs_info = [
-        f"{index+1}. {hub.name}:\n{hub.description if hub.description else line_up}\n{hub.contacts if hub.contacts else line_up}\n{hub.country if hub.country else ''}{', ' + hub.city if hub.city else ''}\n"
+        f"{index+1}. {hub.name}:\n{hub.description if hub.description else ''}\n{hub.contacts if hub.contacts else ''}\n{hub.country if hub.country else ''}{', ' + hub.city if hub.city else ''}\n"
         for index, hub in enumerate(hubs)
     ]
 
@@ -96,8 +95,7 @@ async def distance_find(message: types.Message, state: FSMContext):
         reply = "😔 Нажаль паблізу няма бібліятэк ці палічак з беларускімі кнігамі.\n\nМагчыма побач з табой знойдуцца прыватныя кніжкі іншых карыстальнікаў: [пашукай тут](https://bbc-max.herokuapp.com/) "
     await state.finish()
     await message.answer(
-        reply,
-        reply_markup=create_markup(main_menu_markup_text),
+        reply, reply_markup=create_markup(main_menu_markup_text), parse_mode="Markdown"
     )
 
 
@@ -180,7 +178,7 @@ async def location_add(message: types.Message, state: FSMContext):
         session.add(new_hub)
         await session.commit()
 
-    hub_info = f"{new_hub.name}:\n{new_hub.description if new_hub.description else line_up}\n{new_hub.contacts if new_hub.contacts else line_up}\n{new_hub.country if new_hub.country else ''}{', ' + new_hub.city if new_hub.city else ''}\n"
+    hub_info = f"{new_hub.name}:\n{new_hub.description if new_hub.description else ''}\n{new_hub.contacts if new_hub.contacts else ''}\n{new_hub.country if new_hub.country else ''}{', ' + new_hub.city if new_hub.city else ''}\n"
     reply = "👌 Дададзеная шафа:\n\n" + hub_info
 
     await state.finish()
@@ -211,8 +209,6 @@ def register_handlers(dp: Dispatcher):
         location_add, content_types=["location", "venue"], state=AddHubForm.location
     )
     dp.register_message_handler(
-        location_add_incorrectly,
-        content_types=["location", "venue"],
-        state=AddHubForm.location,
+        location_add_incorrectly, state=[AddHubForm.location, FindHubForm.location]
     )
     dp.register_message_handler(welcome, state="*")
