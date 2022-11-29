@@ -1,6 +1,4 @@
 import asyncio
-from geopy.geocoders import Nominatim
-from geopy.adapters import AioHTTPAdapter
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from config import settings
@@ -8,6 +6,7 @@ from db.base import Base
 from aiogram import Bot
 from aiogram.dispatcher import Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from aiogram.contrib.fsm_storage.redis import RedisStorage2
 from handlers.handlers import register_handlers
 from updates_worker import get_handled_updates_list
 
@@ -24,7 +23,7 @@ async def main():
         engine, expire_on_commit=False, class_=AsyncSession
     )
 
-    bot = Bot(token=settings.token_bot)
+    bot = Bot(token=settings.token_bot, parse_mode="Markdown")
 
     bot["db"] = async_session_maker
 

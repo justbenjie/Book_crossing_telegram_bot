@@ -5,6 +5,7 @@ main_menu_markup_text = ["Знайсці палічку", "Дадаць палі
 find_markup_text = ["Шукаць", "Адмяніць"]
 add_markup_text = ["Дадаць", "Адмяніць"]
 cancel_markup_text = ["Адмяніць"]
+cancel_skip_markup_text = ["Адмяніць", "Прапусціць"]
 distance_markup_text = ["2 км.", "5 км.", "10 км."]
 
 
@@ -18,6 +19,8 @@ def create_markup(texts):
 
 def geolocation_markup():
     markup = ReplyKeyboardMarkup(resize_keyboard=True, selective=True)
-    markup.add(KeyboardButton("Падзяліцца месцазнаходжаннем", request_location=True))
+    markup.add(
+        KeyboardButton("Падзяліцца сваім месцазнаходжаннем", request_location=True)
+    )
 
     return markup

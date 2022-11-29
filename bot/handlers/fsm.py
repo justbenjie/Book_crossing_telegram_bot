@@ -8,5 +8,7 @@ class FindHubForm(StatesGroup):
 
 class AddHubForm(StatesGroup):
     name = State()
+    description = State()
     contacts = State()
     location = State()
+    # address = State()

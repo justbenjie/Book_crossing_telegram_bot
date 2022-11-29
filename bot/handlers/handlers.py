@@ -19,7 +19,6 @@ async def welcome(message: types.Message, state: FSMContext):
     await state.finish()
     await message.answer(
         reply,
-        parse_mode=ParseMode.MARKDOWN,
         reply_markup=create_markup(main_menu_markup_text),
     )
 
@@ -75,26 +74,29 @@ async def distance_find(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
         dict_data = data.as_dict()
 
-    query = select(BookHub.name, BookHub.contacts, BookHub.country, BookHub.city).where(
-        BookHub.calculate_distance(dict_data["location"]) < dict_data["distance"]
-    )
+    query = select(
+        BookHub.name,
+        BookHub.description,
+        BookHub.contacts,
+        BookHub.country,
+        BookHub.city,
+    ).where(BookHub.calculate_distance(dict_data["location"]) < dict_data["distance"])
 
     async with db_session() as session:
-        book_hubs = await session.execute(query)
+        hubs = await session.execute(query)
 
-    book_hubs_info = [
-        f"{index+1}. {hub.name}:\n{hub.contacts}\n{hub.country if hub.country else ''}{', ' + hub.city if hub.city else ''}\n"
-        for index, hub in enumerate(book_hubs)
+    hubs_info = [
+        f"{index+1}. {hub.name}:\n{hub.description if hub.description else line_up}\n{hub.contacts if hub.contacts else line_up}\n{hub.country if hub.country else ''}{', ' + hub.city if hub.city else ''}\n"
+        for index, hub in enumerate(hubs)
     ]
 
-    if len(book_hubs_info) != 0:
-        reply = "👌 Знойдзена па вашым запыце:\n\n" + "\n".join(book_hubs_info)
+    if len(hubs_info) != 0:
+        reply = "👌 Знойдзена па вашым запыце:\n\n" + "\n".join(hubs_info)
     else:
         reply = "😔 Нажаль паблізу няма бібліятэк ці палічак з беларускімі кнігамі.\n\nМагчыма побач з табой знойдуцца прыватныя кніжкі іншых карыстальнікаў: [пашукай тут](https://bbc-max.herokuapp.com/) "
     await state.finish()
     await message.answer(
         reply,
-        parse_mode=ParseMode.MARKDOWN,
         reply_markup=create_markup(main_menu_markup_text),
     )
 
@@ -107,14 +109,26 @@ async def name_add(message: types.Message, state: FSMContext):
     await AddHubForm.next()
     await message.answer(
         "Увядзіце спасылку на вэб-сайт або старонку ў сацыяльнай сетцы.",
-        reply_markup=create_markup(cancel_markup_text),
+        reply_markup=create_markup(cancel_skip_markup_text),
+    )
+
+
+async def description_add(message: types.Message, state: FSMContext):
+    if message.text != "Прапусціць":
+        async with state.proxy() as data:
+            data["description"] = message.text
+
+    await AddHubForm.next()
+    await message.answer(
+        "Дадайце невялікчкае апісанне месца.",
+        reply_markup=create_markup(cancel_skip_markup_text),
     )
 
 
 async def contacts_add(message: types.Message, state: FSMContext):
-
-    async with state.proxy() as data:
-        data["contacts"] = message.text
+    if message.text != "Прапусціць":
+        async with state.proxy() as data:
+            data["contacts"] = message.text
 
     await AddHubForm.next()
     await message.answer(
@@ -132,7 +146,7 @@ async def location_add(message: types.Message, state: FSMContext):
         data["location"] = (lat, lon)
 
     db_session = message.bot.get("db")
-    geocoder_session = message.bot.get("geocoder")
+    # geocoder_session = message.bot.get("geocoder")
 
     async with state.proxy() as data:
         dict_data = data.as_dict()
@@ -158,19 +172,24 @@ async def location_add(message: types.Message, state: FSMContext):
     except KeyError:
         pass
     except AttributeError:
-        await message.answer("❗ Калі ласка Праверце уведзеную лакацыю")
+        await message.answer("❗ Калі ласка праверце уведзеную лакацыю")
 
-    new_book_hub = BookHub(**dict_data)
+    new_hub = BookHub(**dict_data)
 
     async with db_session() as session:
-        session.add(new_book_hub)
+        session.add(new_hub)
         await session.commit()
 
-    book_hub_info = f"{new_book_hub.name}:\n{new_book_hub.contacts}\n{new_book_hub.country if new_book_hub.country else ''}{', ' + new_book_hub.city if new_book_hub.city else ''}\n"
-    reply = "👌 Дададзеная шафа:\n\n" + book_hub_info
+    hub_info = f"{new_hub.name}:\n{new_hub.description if new_hub.description else line_up}\n{new_hub.contacts if new_hub.contacts else line_up}\n{new_hub.country if new_hub.country else ''}{', ' + new_hub.city if new_hub.city else ''}\n"
+    reply = "👌 Дададзеная шафа:\n\n" + hub_info
 
     await state.finish()
     await message.answer(reply, reply_markup=create_markup(main_menu_markup_text))
+
+
+async def location_add_incorrectly(message: types.Message, state: FSMContext):
+    reply = "❗ Калі ласка праверце уведзеную лакацыю"
+    await message.answer(reply, reply_markup=create_markup(cancel_markup_text))
 
 
 def register_handlers(dp: Dispatcher):
@@ -186,8 +205,14 @@ def register_handlers(dp: Dispatcher):
     dp.register_message_handler(distance_find, state=FindHubForm.distance)
 
     dp.register_message_handler(name_add, state=AddHubForm.name)
+    dp.register_message_handler(description_add, state=AddHubForm.description)
     dp.register_message_handler(contacts_add, state=AddHubForm.contacts)
     dp.register_message_handler(
         location_add, content_types=["location", "venue"], state=AddHubForm.location
+    )
+    dp.register_message_handler(
+        location_add_incorrectly,
+        content_types=["location", "venue"],
+        state=AddHubForm.location,
     )
     dp.register_message_handler(welcome, state="*")
